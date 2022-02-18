@@ -203,7 +203,7 @@ pub struct Config {
     /// A map of additional options to be stored in config.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "HashMap::is_empty"))]
     #[cfg_attr(feature = "serde", serde(default))]
-    pub options: HashMap<String, String>,
+    pub options: HashMap<String, toml::Value>,
 
     /// The path that this configuration was loaded from.
     ///
@@ -612,8 +612,8 @@ impl Config {
     }
 
     /// Looks up the specified string in the options map.
-    pub fn get_option(&self, option: &str) -> Option<&str> {
-        self.options.get(option).map(String::as_str)
+    pub fn get_option(&self, option: &str) -> Option<&toml::Value> {
+        self.options.get(option)
     }
 
     /// Gets whether or not to use a mock connection for testing.
@@ -676,12 +676,12 @@ mod test {
         let cfg = Config {
             options: {
                 let mut map = HashMap::new();
-                map.insert(format!("testing"), format!("test"));
+                map.insert(format!("testing"), toml::Value::String(format!("test")));
                 map
             },
             ..Default::default()
         };
-        assert_eq!(cfg.get_option("testing"), Some("test"));
+        assert_eq!(cfg.get_option("testing"), Some(&toml::Value::String(format!("test"))));
         assert_eq!(cfg.get_option("not"), None);
     }
 
